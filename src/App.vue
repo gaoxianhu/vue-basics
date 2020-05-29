@@ -1,60 +1,92 @@
 <template>
-<div>
-    <header class="site-header jumbotron">
-      <div class="container">
-        <div class="row">
-          <div class="col-xs-12">
-            <h1>请发表对Vue的评论</h1>
-          </div>
-        </div>
-      </div>
-    </header>
-    <div class="container">
-      <!-- <Add :addComment="addComment"/> 通过props传递数据 -->
-      <!-- <Add ref="add"/> 通过自定义事件从儿子拿数据 -->
-      <Add @addComment="addComment"/>
-      <List :comments="comments" :deleteComment="deleteComment"/>
+  <div class="todo-container">
+    <div class="todo-wrap">
+      <!-- <Header :addTodo="addTodo"></Header> -->
+      <!-- <Header @addTodo="addTodo"></Header> 或-->
+      <Header ref="add"></Header>
+      <Main :todos="todos" :updateOne="updateOne" :deleteOne="deleteOne"></Main>
+      <!-- props版本 -->
+      <!-- <Footer :todos="todos" :updateAll="updateAll" :deleteAll="deleteAll"></Footer> -->
+      <!-- 全局事件总线版本 -->
+      <Footer :todos="todos" :updateAll="updateAll"></Footer>
     </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-import Add from '@/components/Add'
-import List from '@/components/List'
-export default {
-  components:{
-    Add,
-    List
-  },
-  //自定义事件绑定事件的一种写法
-  // mounted () {
-  //     //this.$refs.add就是组件对象
-  //     //this.$refs.add.$on本质上是Vue原型的方法
-  //     //相当于在父组件当中给子组件绑定了一个事件（自己定义的事件）
-  //     //特点：回调函数是在父组件当中的
-  //     this.$refs.add.$on('addComment',this.addComment)
-  // },
-  data () {
-    return {
-      comments:[
-        {id:1,username:'赵丽颖',content:'Vue真棒'},
-        {id:2,username:'杨幂',content:'Vue真好'},
-        {id:3,username:'渊哥',content:'Vue一定要好好学'}
-      ]
-    }
-  },
-  methods: {
-    addComment(obj){
-      this.comments.unshift(obj)
+import Header from '@/components/Header'
+import Main from '@/components/Main'
+import Footer from '@/components/Footer'
+  export default {
+    components:{
+      Header,
+      Main,
+      Footer
     },
-    deleteComment(index){
-      this.comments.splice(index,1)
+    mounted () {
+      this.$refs.add.$on('addTodo',this.addTodo),
+      this.$bus //是我们的全局事件总线对象
+      //通过给这个事件总线对象绑定事件
+      this.$bus.$on('deleteAll',this.deleteAll)
+    },
+    data () {
+      return {
+        todos:JSON.parse(localStorage.getItem('todos_key')) || []
+      }
+    },
+    methods: {
+      addTodo(obj){
+        this.todos.unshift(obj)
+      },
+      updateOne(index,val){
+        this.todos[index].isOver = val
+      },
+      deleteOne(index){
+        this.todos.splice(index,1)
+      },
+      updateAll(val){
+        this.todos.forEach(item => item.isOver = val)
+      },
+      deleteAll(){
+        //把已经完成的也就是isOver为true的干掉
+        //也可以认为是把isOver为false的留下
+        //过滤出所有没有完成的，组成新数组，赋值给this.todos
+        this.todos = this.todos.filter(item => !item.isOver)
+      }
+    },
+    watch: {
+      // todos(newVal,oldVal){
+      //   //一般监视：只能监视todos本身，删除一项或者增加一项
+      //   //不能监视内部更深层次的数据，不能监视到你是否操作了数组内部对象的数据
+      //   //只要数据发生改变，那就保存新的数据，保存到localStorage
+      //   //如果存储数据的时候，默认会把数据调用对应的toString方法，转化之后才会存储
+      //   //对象.toString会转化为'[object,Object]'
+      //   //数组.toString会转化为'中括号去掉加引号'
+      //   //函数.toString会转化为'函数本身加引号'
+      //   //因此我们需要把数据转换为JSON串去存储，就不会说看不懂了
+      //   // localStorage.setItem('todos_key',JSON.stringify(newVal))
+      // }
+      todos:{
+        // 深度监视，不管本身变化还是内部数据变化，都会监视到
+        deep:true,
+        handler(newVal,oldVal){
+          localStorage.setItem('todos_key',JSON.stringify(newVal))
+        }
+      }
     }
   }
-}
 </script>
 
 <style scoped>
-
+/*app*/
+.todo-container {
+  width: 600px;
+  margin: 0 auto;
+}
+.todo-container .todo-wrap {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
 
 </style>
