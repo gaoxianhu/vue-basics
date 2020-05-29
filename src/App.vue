@@ -25,7 +25,7 @@ import Footer from '@/components/Footer'
     },
     mounted () {
       this.$refs.add.$on('addTodo',this.addTodo),
-      this.$bus //是我们的全局事件总线对象
+      //this.$bus //是我们的全局事件总线对象
       //通过给这个事件总线对象绑定事件
       this.$bus.$on('deleteAll',this.deleteAll)
     },
