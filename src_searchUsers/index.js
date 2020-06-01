@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import App from '@/App'
 // import "@babel/polyfill";
-import store from '@/vuex/store'
 Vue.config.productionTip = false
 
 new Vue({
@@ -10,6 +9,5 @@ new Vue({
       Vue.prototype.$bus = this  
     },
     el: '#root',
-    render: h => h(App),
-    store
+    render: h => h(App)
 })
