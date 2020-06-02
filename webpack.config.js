@@ -9,7 +9,8 @@ module.exports = {
     // entry: './src/index.js', //入口
     output: {
       path: path.resolve(__dirname, 'dist'),//打包完成后的文件放在哪，dist会自动创建好
-      filename: 'main.js'
+      filename: 'main.js',
+      publicPath:'/' //引入打包文件时路径以/开头
     },
     //配置各种loader
     module: {
@@ -100,7 +101,8 @@ module.exports = {
             //这一行的作用就是把/api去掉，就是真正的目标地址
             changeOrigin:true, //支持跨域，如果协议/主机也不相同，必须加上
           }
-        }
+        },
+        historyApiFallback:true,//任意的404响应都会被替代为index.html 备胎
     },
 
     devtool:'cheap-module-eval-source-map',//定位出错所在的原始代码行
